@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   THEME VARIABLES — C-Square Club
+========================= */
+:root {
+  /* Core backgrounds */
+  --bg-dark: #000000;
+  --bg-tech: #0a0a0a;
+  --panel-bg: #111111;
+
+  /* Primary = Gold (C-Square brand) */
+  --primary: #FFD700;
+  --primary-glow: rgba(255, 215, 0, 0.30);
+
+  /* Accent = Cyan glow */
+  --accent: #00D8FF;
+  --accent-cyan: #00D8FF;
+
+  /* Text */
+  --text-main: #FFFFFF;
+  --text-muted: #A0A0A0;
+  --text-dim: #707070;
+
+  /* Glass / card surfaces */
+  --glass-bg: rgba(10, 10, 10, 0.85);
+  --glass-border: rgba(255, 215, 0, 0.12);
+  --card-bg: rgba(15, 15, 15, 0.90);
+  --border-color: #222222;
+
+  /* Subtle elements (buttons, separators) */
+  --subtle-bg: rgba(255, 255, 255, 0.06);
+  --subtle-border: rgba(255, 255, 255, 0.1);
+
+  /* Code editor colours */
+  --code-keyword: #FFD700;
+  --code-func: #00D8FF;
+  --code-string: #57E57F;
+  --code-plain: #cccccc;
+}
+
+/* Light theme — softer gold-on-white */
+.light-theme {
+  --bg-dark: #f9f9f2;
+  --bg-tech: #f1f1e8;
+  --panel-bg: #ffffff;
+
+  --primary: #c8a800;
+  --primary-glow: rgba(200, 168, 0, 0.22);
+
+  --accent: #0070bb;
+  --accent-cyan: #0070bb;
+
+  --text-main: #111111;
+  --text-muted: #555555;
+  --text-dim: #888888;
+
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(200, 168, 0, 0.18);
+  --card-bg: rgba(255, 255, 255, 0.90);
+  --border-color: #e0e0d0;
+
+  /* Subtle elements (inverted for light mode) */
+  --subtle-bg: rgba(0, 0, 0, 0.06);
+  --subtle-border: rgba(0, 0, 0, 0.1);
+
+  --code-keyword: #b38600;
+  --code-func: #0055a4;
+  --code-string: #1a7a3a;
+  --code-plain: #444444;
+}
+
+.light-theme .navbar-logo {
+  filter: invert(1) brightness(0);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-main);
+  overflow-x: hidden;
+  transition: .4s;
+}
+
+/* =========================
+   BACKGROUND BLOBS
+========================= */
+.bg-blob {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  animation: blobFloat 10s infinite alternate;
+}
+
+.blob-1 {
+  top: -10%;
+  left: -10%
+}
+
+.blob-2 {
+  bottom: -10%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(0, 216, 255, 0.18), transparent 70%);
+  animation-delay: -5s;
+}
+
+@keyframes blobFloat {
+  to {
+    transform: translate(40px, -40px) scale(1.1)
+  }
+}
+
+/* Accessibility */
+@media(prefers-reduced-motion:reduce) {
+  * {
+    animation: none !important;
+    transition: none !important
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); filter: blur(10px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}

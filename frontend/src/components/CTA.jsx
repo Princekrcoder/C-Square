@@ -1,0 +1,30 @@
+import { Link } from 'react-router-dom'
+
+const CTA = () => {
+    return (
+        <section className="py-[100px] px-6 pb-[140px] relative" id="join">
+            <div className="max-w-[1000px] mx-auto">
+                <div className="bg-[radial-gradient(circle_at_top_right,rgba(255,215,0,0.08),rgba(0,0,0,0)),linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))] border border-[rgba(255,215,0,0.15)] backdrop-blur-[20px] rounded-[30px] md:rounded-[40px] p-[60px_24px] md:p-[80px_40px] text-center relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.6),0_0_60px_rgba(255,215,0,0.05)] before:content-[''] before:absolute before:top-0 before:left-1/2 before:-translate-x-1/2 before:w-[60%] before:h-[2px] before:bg-gradient-to-r before:from-transparent before:via-primary before:to-transparent before:opacity-80">
+                    <h2 className="text-[2.5rem] md:text-[3.5rem] font-[800] mb-6 text-textMain tracking-[-1px] leading-tight">
+                        Ready to Level Up Your Coding?
+                    </h2>
+                    <p className="text-[1.1rem] md:text-[1.25rem] text-textMuted mb-12 max-w-[600px] mx-auto leading-[1.6]">
+                        Join C-Square and become part of a thriving community of coders, builders, and innovators.
+                        Weekly challenges, workshops, and hackathons await you.
+                    </p>
+
+                    <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-5 flex-wrap">
+                        <Link to="/login" className="px-9 py-4 rounded-[16px] text-[1.1rem] font-[700] no-underline transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] inline-flex items-center justify-center gap-[10px] w-full md:w-auto bg-primary text-[#111111] shadow-[0_8px_20px_var(--tw-shadow-color)] shadow-[rgba(255,215,0,0.3)] hover:bg-primary hover:shadow-[0_10px_32px_rgba(255,215,0,0.3),0_0_0_2px_rgba(255,215,0,0.22)]">
+                            Join Now <span>🚀</span>
+                        </Link>
+                        <a href="#events" className="px-9 py-4 rounded-[16px] text-[1.1rem] font-[700] no-underline transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] inline-flex items-center justify-center gap-[10px] w-full md:w-auto bg-transparent text-textMain border border-subtleBorder hover:bg-subtleBg hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+                            Explore Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    )
+}
+
+export default CTA
