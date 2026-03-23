@@ -3,6 +3,7 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('./db');
+const cron = require('node-cron');
 
 const app = express();
 app.use(cors());
@@ -766,6 +767,40 @@ setupCMSAPI('/api/cms/resources', 'csquare_cms_resources');
 setupCMSAPI('/api/cms/stories', 'csquare_cms_stories');
 setupCMSAPI('/api/cms/blog', 'csquare_cms_blog');
 
+
+// ==========================================
+// SCHEDULED JOB: Auto-update event statuses
+// ==========================================
+// Runs every minute. Updates status based on event date:
+//   • Same calendar day  → Ongoing
+//   • Future date        → Upcoming
+//   • Past date          → Completed
+// NOTE: Events manually set to 'Completed' by admin whose date
+//       has already passed will remain Completed regardless.
+cron.schedule('* * * * *', async () => {
+    try {
+        // Cast the varchar date to ::date for comparison.
+        // PostgreSQL handles ISO strings like '2026-03-20T14:00' correctly.
+        const result = await pool.query(`
+            UPDATE csquare_events
+            SET status = CASE
+                WHEN date::date = CURRENT_DATE THEN 'Ongoing'
+                WHEN date::date > CURRENT_DATE THEN 'Upcoming'
+                ELSE 'Completed'
+            END
+            WHERE date IS NOT NULL
+              AND date != ''
+              AND (status != 'Completed' OR date::date > CURRENT_DATE)
+        `);
+        if (result.rowCount > 0) {
+            console.log(`[Scheduler] Auto-updated ${result.rowCount} event status(es).`);
+        }
+    } catch (err) {
+        console.error('[Scheduler] Error updating event statuses:', err.message);
+    }
+});
+
+console.log('[Scheduler] Event status auto-update job started (runs every minute).');
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
