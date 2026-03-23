@@ -32,8 +32,8 @@ const Team = ({ searchTerm = '' }) => {
         setLoading(true)
         try {
             const [teamRes, taskRes] = await Promise.all([
-                fetch('http://localhost:5000/api/team'),
-                fetch('http://localhost:5000/api/tasks')
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/team`),
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks`)
             ])
             if (teamRes.ok) setTeam(await teamRes.json())
             if (taskRes.ok) setTasks(await taskRes.json())
@@ -54,7 +54,7 @@ const Team = ({ searchTerm = '' }) => {
             const token = localStorage.getItem('token')
             const dataToSave = { ...form }
             
-            const url = editing ? `http://localhost:5000/api/team/${editing}` : 'http://localhost:5000/api/team'
+            const url = editing ? `http://localhost:5000/api/team/${editing}` : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/team`
             const method = editing ? 'PUT' : 'POST'
             
             const res = await fetch(url, {
@@ -75,7 +75,7 @@ const Team = ({ searchTerm = '' }) => {
         try {
             setSaving(true)
             const token = localStorage.getItem('token')
-            const res = await fetch('http://localhost:5000/api/tasks', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tasks`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(taskForm)
             })

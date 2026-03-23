@@ -23,10 +23,10 @@ const CMS = ({ searchTerm = '' }) => {
     const fetchCMS = async () => {
         try {
             const [hRes, rRes, sRes, bRes] = await Promise.all([
-                fetch('http://localhost:5000/api/cms/highlights'),
-                fetch('http://localhost:5000/api/cms/resources'),
-                fetch('http://localhost:5000/api/cms/stories'),
-                fetch('http://localhost:5000/api/cms/blog')
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cms/highlights`),
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cms/resources`),
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cms/stories`),
+                fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/cms/blog`)
             ])
             if(hRes.ok) setHighlights(await hRes.json())
             if(rRes.ok) setResources(await rRes.json())

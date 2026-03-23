@@ -1,0 +1,22 @@
+{
+    "name": "c-square Studio",
+    "short_name": "c-square",
+    "description": "c-square Studio builds fast, scalable websites, web applications and e-commerce platforms.",
+    "start_url": "/",
+    "scope": "/",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#050505",
+    "background_color": "#050505",
+    "display": "standalone"
+}

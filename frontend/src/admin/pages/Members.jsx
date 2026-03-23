@@ -22,20 +22,6 @@ const RoleBadge = ({ r }) => {
     return <span className={`badge ${m[r] || 'badge-gray'}`}>{r}</span>
 }
 
-const SAMPLE_MEMBERS = [
-    { id: 1, name: 'Aarav Sharma', email: 'aarav.sharma@example.com', phone: '9876543210', track: 'Web Dev', role: 'Core', batch: '2024', github: 'aarav-dev', linkedin: 'aaravsharma', status: 'Active', joinDate: '2024-08-15' },
-    { id: 2, name: 'Priya Gupta', email: 'priya.g@example.com', phone: '9812345678', track: 'AI/ML', role: 'Core', batch: '2023', github: 'priya-ml', linkedin: 'priyagupta', status: 'Active', joinDate: '2023-08-10' },
-    { id: 3, name: 'Rishabh Kumar', email: 'rishabh.k@example.com', phone: '9934567810', track: 'DSA', role: 'Member', batch: '2024', github: 'rishabh-cp', linkedin: 'rishabhkumar', status: 'Active', joinDate: '2024-09-01' },
-    { id: 4, name: 'Sneha Verma', email: 'sneha.v@example.com', phone: '9811122334', track: 'DevOps', role: 'Member', batch: '2024', github: 'sneha-ops', linkedin: 'snehaverma', status: 'Pending', joinDate: '2024-11-15' },
-    { id: 5, name: 'Arjun Patel', email: 'arjun.p@example.com', phone: '9871122334', track: 'Web Dev', role: 'Member', batch: '2022', github: 'arjun-web', linkedin: 'arjunpatel', status: 'Alumni', joinDate: '2022-08-20' },
-    { id: 6, name: 'Meera Singh', email: 'meera.s@example.com', phone: '9844112233', track: 'AI/ML', role: 'Core', batch: '2023', github: 'meera-ai', linkedin: 'meerasingh', status: 'Active', joinDate: '2023-09-05' },
-    { id: 7, name: 'Kartik Yadav', email: 'kartik.y@example.com', phone: '9856781234', track: 'DSA', role: 'Member', batch: '2025', github: 'kartik-dsa', linkedin: 'kartikyadav', status: 'Pending', joinDate: '2025-01-10' },
-    { id: 8, name: 'Divya Nair', email: 'divya.n@example.com', phone: '9823344556', track: 'General', role: 'Member', batch: '2024', github: '', linkedin: 'divyanair', status: 'Active', joinDate: '2024-08-25' },
-    { id: 9, name: 'Rohan Mehta', email: 'rohan.m@example.com', phone: '9867788990', track: 'Web Dev', role: 'Core', batch: '2023', github: 'rohan-dev', linkedin: 'rohanmehta', status: 'Active', joinDate: '2023-08-18' },
-    { id: 10, name: 'Ananya Das', email: 'ananya.d@example.com', phone: '9890011223', track: 'AI/ML', role: 'Member', batch: '2024', github: 'ananya-ml', linkedin: 'ananyadAs', status: 'Active', joinDate: '2024-10-01' },
-    { id: 11, name: 'Vikram Rao', email: 'vikram.r@example.com', phone: '9811001100', track: 'DevOps', role: 'Member', batch: '2022', github: 'vikram-ops', linkedin: 'vikramrao', status: 'Alumni', joinDate: '2022-09-12' },
-    { id: 12, name: 'Pooja Jaiswal', email: 'pooja.j@example.com', phone: '9823112233', track: 'Web Dev', role: 'Member', batch: '2025', github: '', linkedin: '', status: 'Pending', joinDate: '2025-02-01' },
-]
 
 const Clients = ({ searchTerm = '' }) => {
     const navigate = useNavigate()
@@ -57,7 +43,7 @@ const Clients = ({ searchTerm = '' }) => {
     const fetchClients = async () => {
         setLoading(true)
         try {
-            const res = await fetch('http://localhost:5000/api/members')
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/members`)
             if (res.ok) {
                 const data = await res.json()
                 setClients(data)
@@ -103,7 +89,7 @@ const Clients = ({ searchTerm = '' }) => {
                 })
                 if (res.ok) await fetchClients()
             } else {
-                const res = await fetch('http://localhost:5000/api/members', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/members`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(clientData)

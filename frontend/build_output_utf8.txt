@@ -1,0 +1,30 @@
+﻿
+> c-square@0.0.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 1782 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m    1.43 kB[22m[1m[22m[2m Γöé gzip:   0.68 kB[22m
+[2mdist/[22m[32massets/white-logo-InpEKtKB.png     [39m[1m[2m  109.74 kB[22m[1m[22m
+[2mdist/[22m[32massets/yellow-logo-eQjgm660.png    [39m[1m[2m  342.10 kB[22m[1m[22m
+[2mdist/[22m[32massets/project-thumb-BekRnAlF.png  [39m[1m[2m  549.66 kB[22m[1m[22m
+[2mdist/[22m[32massets/CU-C4ABhxEl.svg             [39m[1m[2m2,687.89 kB[22m[1m[22m[2m Γöé gzip: 377.78 kB[22m
+[2mdist/[22m[35massets/Register-CEaj5mdm.css       [39m[1m[2m    6.65 kB[22m[1m[22m[2m Γöé gzip:   1.88 kB[22m
+[2mdist/[22m[35massets/Login-CNiT_uog.css          [39m[1m[2m    7.08 kB[22m[1m[22m[2m Γöé gzip:   1.96 kB[22m
+[2mdist/[22m[35massets/index-BiSbp5Mf.css          [39m[1m[2m   57.75 kB[22m[1m[22m[2m Γöé gzip:  10.84 kB[22m
+[2mdist/[22m[36massets/project-thumb-Dg_c1g1f.js   [39m[1m[2m    0.11 kB[22m[1m[22m[2m Γöé gzip:   0.12 kB[22m[2m Γöé map:     0.22 kB[22m
+[2mdist/[22m[36massets/github-hMMUK0L8.js          [39m[1m[2m    1.17 kB[22m[1m[22m[2m Γöé gzip:   0.59 kB[22m[2m Γöé map:     2.42 kB[22m
+[2mdist/[22m[36massets/Collaborations-CrjtNy4s.js  [39m[1m[2m    2.14 kB[22m[1m[22m[2m Γöé gzip:   1.05 kB[22m[2m Γöé map:     3.48 kB[22m
+[2mdist/[22m[36massets/CTA-QakQXMWD.js             [39m[1m[2m    2.26 kB[22m[1m[22m[2m Γöé gzip:   1.01 kB[22m[2m Γöé map:     3.21 kB[22m
+[2mdist/[22m[36massets/Team-Ci4WX--A.js            [39m[1m[2m    2.51 kB[22m[1m[22m[2m Γöé gzip:   1.15 kB[22m[2m Γöé map:     4.96 kB[22m
+[2mdist/[22m[36massets/About-CSsuoKEf.js           [39m[1m[2m    3.04 kB[22m[1m[22m[2m Γöé gzip:   1.34 kB[22m[2m Γöé map:     7.94 kB[22m
+[2mdist/[22m[36massets/EventsPage-P-SQyRBf.js      [39m[1m[2m    3.55 kB[22m[1m[22m[2m Γöé gzip:   1.44 kB[22m[2m Γöé map:     8.59 kB[22m
+[2mdist/[22m[36massets/Login-B6TU3Xol.js           [39m[1m[2m    3.95 kB[22m[1m[22m[2m Γöé gzip:   1.53 kB[22m[2m Γöé map:    12.14 kB[22m
+[2mdist/[22m[36massets/Events-DuSCKVUv.js          [39m[1m[2m    4.11 kB[22m[1m[22m[2m Γöé gzip:   1.63 kB[22m[2m Γöé map:     8.87 kB[22m
+[2mdist/[22m[36massets/Register-Q_EMDqJc.js        [39m[1m[2m    4.38 kB[22m[1m[22m[2m Γöé gzip:   1.51 kB[22m[2m Γöé map:    13.49 kB[22m
+[2mdist/[22m[36massets/Footer-DhyII8oh.js          [39m[1m[2m   13.06 kB[22m[1m[22m[2m Γöé gzip:   4.08 kB[22m[2m Γöé map: 5,816.74 kB[22m
+[2mdist/[22m[36massets/index-Dh4FHY1E.js           [39m[1m[2m  345.77 kB[22m[1m[22m[2m Γöé gzip:  95.43 kB[22m[2m Γöé map: 1,205.80 kB[22m
+[32mΓ£ô built in 4.45s[39m

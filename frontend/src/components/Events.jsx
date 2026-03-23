@@ -9,7 +9,7 @@ const Events = () => {
     useEffect(() => {
         const fetchFeaturedEvents = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/events/featured');
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events/featured`);
                 if (res.ok) {
                     const data = await res.json();
                     setEvents(data);
@@ -24,25 +24,7 @@ const Events = () => {
         fetchFeaturedEvents();
     }, []);
 
-    // Fallback events if database is empty or fetch fails
-    const displayEvents = events.length > 0 ? events : [
-        {
-            id: 1,
-            title: "Competitive Coding Challenge",
-            image_url: projectThumb,
-            description: "Join our latest coding contest to compete with your peers and improve your DSA skills.",
-            tags: ["C++", "Python", "Algorithms", "DSA"],
-            status: "Upcoming"
-        },
-        {
-            id: 2,
-            title: "Web Development Bootcamp",
-            image_url: projectThumb,
-            description: "An interactive bootcamp covering the fundamentals of modern web development.",
-            tags: ["HTML", "CSS", "React", "Node.js"],
-            status: "Upcoming"
-        }
-    ];
+    const displayEvents = events;
 
     if (loading) {
         return (

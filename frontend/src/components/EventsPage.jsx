@@ -13,7 +13,7 @@ const EventsPage = ({ theme, toggleTheme }) => {
         window.scrollTo(0, 0);
         const fetchAllEvents = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/events');
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`);
                 if (res.ok) {
                     const data = await res.json();
                     setEvents(data);

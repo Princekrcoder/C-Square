@@ -10,16 +10,6 @@ const EventBadge = ({ status }) => {
     return <span className={`badge ${map[status] || 'badge-gray'} `}>{status}</span>
 }
 
-const SAMPLE_EVENTS = [
-    { id: 1, title: 'Web Dev Bootcamp', type: 'Workshop', status: 'Upcoming', date: '2026-03-20', location: 'CS Lab 301', description: 'Hands-on bootcamp covering HTML, CSS, React from scratch.', registered: 45 },
-    { id: 2, title: 'Winter of Code 2025', type: 'Hackathon', status: 'Completed', date: '2025-12-10', location: 'Main Auditorium', description: 'Month-long open-source coding challenge for all members.', registered: 120 },
-    { id: 3, title: 'CP Contest — March', type: 'Contest', status: 'Upcoming', date: '2026-03-25', location: 'Online (Codeforces)', description: 'Monthly competitive programming contest on Codeforces.', registered: 68 },
-    { id: 4, title: 'AI/ML Study Group', type: 'Meetup', status: 'Ongoing', date: '2026-03-14', location: 'Room 204', description: 'Weekly discussions on ML concepts, papers, and projects.', registered: 22 },
-    { id: 5, title: 'Git & Open Source Intro', type: 'Workshop', status: 'Completed', date: '2026-01-15', location: 'CS Lab 301', description: 'Introduction to Git workflow and contributing to open-source projects.', registered: 55 },
-    { id: 6, title: 'DevSprint Spring 2026', type: 'Hackathon', status: 'Upcoming', date: '2026-04-12', location: 'Main Auditorium', description: '24-hour hackathon to build prototypes on real-world problems.', registered: 90 },
-    { id: 7, title: 'DSA Deep Dive', type: 'Workshop', status: 'Completed', date: '2026-02-08', location: 'CS Lab 201', description: 'Advanced graphs, trees, and DP problem-solving session.', registered: 38 },
-    { id: 8, title: 'Tech Talk: Web3 & Blockchain', type: 'Meetup', status: 'Upcoming', date: '2026-03-28', location: 'Seminar Hall', description: 'Guest speaker session on Web3 fundamentals and real-world use cases.', registered: 30 },
-]
 
 const AdminEvents = ({ searchTerm = '' }) => {
     const [events, setEvents] = useState([])
@@ -39,7 +29,7 @@ const AdminEvents = ({ searchTerm = '' }) => {
     const fetchEvents = async () => {
         setLoading(true)
         try {
-            const res = await fetch('http://localhost:5000/api/events')
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`)
             if (res.ok) {
                 const data = await res.json()
                 setEvents(data)
@@ -82,7 +72,7 @@ const AdminEvents = ({ searchTerm = '' }) => {
                     setEvents(prev => prev.map(e => e.id === editing ? updated : e))
                 }
             } else {
-                const res = await fetch('http://localhost:5000/api/events', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/events`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(form)

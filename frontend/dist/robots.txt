@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /manager/
+Disallow: /client/
+
+Sitemap: https://csquare.vercel.app/sitemap.xml
