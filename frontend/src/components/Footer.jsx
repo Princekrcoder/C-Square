@@ -68,7 +68,6 @@ const Footer = () => {
                             <li className="mb-3"><Link to="/about" className="group text-textMuted no-underline text-[1rem] transition-all duration-300 ease inline-flex items-center hover:text-primary hover:translate-x-1">About Us</Link></li>
                             <li className="mb-3"><a href="/#highlights" className="group text-textMuted no-underline text-[1rem] transition-all duration-300 ease inline-flex items-center hover:text-primary hover:translate-x-1">Highlights</a></li>
                             <li className="mb-3"><a href="/#team" className="group text-textMuted no-underline text-[1rem] transition-all duration-300 ease inline-flex items-center hover:text-primary hover:translate-x-1">Our Team</a></li>
-                            <li className="mb-3"><a href="/#contact-form" className="group text-textMuted no-underline text-[1rem] transition-all duration-300 ease inline-flex items-center hover:text-primary hover:translate-x-1">Contact</a></li>
                         </ul>
                     </div>
 

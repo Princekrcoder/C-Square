@@ -14,7 +14,6 @@ const Collaborations = lazy(() => import('./components/Collaborations.jsx'))
 const Events = lazy(() => import('./components/Events.jsx'))
 const Team = lazy(() => import('./components/Team.jsx'))
 const CTA = lazy(() => import('./components/CTA.jsx'))
-const Contact = lazy(() => import('./components/Contact.jsx'))
 const Footer = lazy(() => import('./components/Footer.jsx'))
 
 // Pages
@@ -70,7 +69,6 @@ function App() {
           <Team />
           <Collaborations />
           <CTA />
-          <Contact />
           <Footer />
         </Suspense>
       </div>
