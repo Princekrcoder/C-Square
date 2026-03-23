@@ -11,8 +11,8 @@ const TABS = [
 
 const Settings = ({ theme, toggleTheme }) => {
     const [tab, setTab] = useState('company')
-    const [company, setCompany] = useState({ name: 'CodeNexus Studio', tagline: 'Building Digital Experiences', email: 'hello@codenexus.in', phone: '+91 98765 43210', address: 'Chandigarh, India', website: 'https://codenexus.in' })
-    const [smtp, setSmtp] = useState({ host: 'smtp.gmail.com', port: '587', user: 'admin@codenexus.in', password: '', from: 'CodeNexus Studio <hello@codenexus.in>' })
+    const [company, setCompany] = useState({ name: 'c-square Studio', tagline: 'Building Digital Experiences', email: 'hello@c-square.in', phone: '+91 98765 43210', address: 'Chandigarh, India', website: 'https://c-square.in' })
+    const [smtp, setSmtp] = useState({ host: 'smtp.gmail.com', port: '587', user: 'admin@c-square.in', password: '', from: 'c-square Studio <hello@c-square.in>' })
     const [saved, setSaved] = useState(false)
 
     const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000) }
@@ -20,7 +20,7 @@ const Settings = ({ theme, toggleTheme }) => {
     return (
         <>
             <div className="admin-page-header">
-                <div><h2>Settings</h2><p>Configure CodeNexus Studio</p></div>
+                <div><h2>Settings</h2><p>Configure c-square Studio</p></div>
                 <button className="btn-primary" onClick={handleSave} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                     <Save size={14} /> {saved ? 'Saved!' : 'Save Changes'}
                 </button>
@@ -45,7 +45,7 @@ const Settings = ({ theme, toggleTheme }) => {
                     <div className="admin-card-header"><h3>Company Information</h3></div>
                     <div className="admin-modal-body" style={{ padding: '1.5rem' }}>
                         <div className="admin-form-grid">
-                            {[['Studio Name', 'name', 'CodeNexus Studio'], ['Tagline', 'tagline', ''], ['Email', 'email', ''], ['Phone', 'phone', ''], ['Address', 'address', ''], ['Website', 'website', '']].map(([lbl, key, ph]) => (
+                            {[['Studio Name', 'name', 'c-square Studio'], ['Tagline', 'tagline', ''], ['Email', 'email', ''], ['Phone', 'phone', ''], ['Address', 'address', ''], ['Website', 'website', '']].map(([lbl, key, ph]) => (
                                 <div className={`admin-form-group${lbl === 'Address' || lbl === 'Website' ? '' : (lbl === 'Studio Name' || lbl === 'Tagline' ? ' full' : '')}`} key={key}>
                                     <label>{lbl}</label>
                                     <input value={company[key]} placeholder={ph} onChange={e => setCompany({ ...company, [key]: e.target.value })} />

@@ -140,9 +140,9 @@ const Hero = () => {
             <Link to="/login" className="px-8 py-[14px] rounded-xl no-underline font-semibold relative z-10 transition-all duration-[220ms] ease-out bg-primary text-[#111111] shadow-[0_8px_20px_var(--tw-shadow-color)] shadow-primaryGlow hover:-translate-y-1 hover:shadow-[0_14px_36px_var(--tw-shadow-color),0_0_0_2px_rgba(255,215,0,0.3)]">
               Become a Member
             </Link>
-            <a href="#events" className="px-8 py-[14px] rounded-xl no-underline font-semibold relative z-10 transition-all duration-[220ms] ease-out bg-glassBg border border-glassBorder text-textMain shadow-[0_8px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.4)] hover:border-primary">
+            <Link to="/events" className="px-8 py-[14px] rounded-xl no-underline font-semibold relative z-10 transition-all duration-[220ms] ease-out bg-glassBg border border-glassBorder text-textMain shadow-[0_8px_24px_rgba(0,0,0,0.1)] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.4)] hover:border-primary">
               Explore Events
-            </a>
+            </Link>
           </div>
         </div>
 

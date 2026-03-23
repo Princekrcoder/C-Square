@@ -11,7 +11,6 @@ import AdminLayout from './admin/AdminLayout.jsx'
 
 // Lazy load portal routes
 const Collaborations = lazy(() => import('./components/Collaborations.jsx'))
-const HowToJoin = lazy(() => import('./components/HowToJoin.jsx'))
 const Events = lazy(() => import('./components/Events.jsx'))
 const Team = lazy(() => import('./components/Team.jsx'))
 const CTA = lazy(() => import('./components/CTA.jsx'))
@@ -20,6 +19,9 @@ const Footer = lazy(() => import('./components/Footer.jsx'))
 
 // Pages
 const About = lazy(() => import('./components/About.jsx'))
+const Login = lazy(() => import('./components/Login.jsx'))
+const Register = lazy(() => import('./components/Register.jsx'))
+const EventsPage = lazy(() => import('./components/EventsPage.jsx'))
 
 const LoadingFallback = () => (
   <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: 'var(--text-muted)' }}>
@@ -68,7 +70,6 @@ function App() {
           <Team />
           <Collaborations />
           <CTA />
-          <HowToJoin />
           <Contact />
           <Footer />
         </Suspense>
@@ -81,6 +82,9 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<About theme={theme} toggleTheme={toggleTheme} />} />
+        <Route path="/events" element={<EventsPage theme={theme} toggleTheme={toggleTheme} />} />
+        <Route path="/login" element={<Login theme={theme} toggleTheme={toggleTheme} />} />
+        <Route path="/register" element={<Register theme={theme} toggleTheme={toggleTheme} />} />
         <Route path="/admin/*" element={<AdminLayout theme={theme} toggleTheme={toggleTheme} />} />
       </Routes>
     </Suspense>

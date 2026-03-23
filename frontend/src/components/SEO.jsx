@@ -1,14 +1,14 @@
 import { Helmet } from "react-helmet-async";
 
 const SEO = ({
-  title = "Top Web Development Agency in Mohali | CodeNexus Studio",
-  description = "CodeNexus Studio is a premier web development company in Mohali, Punjab offering custom React web apps, e-commerce solutions, and tech consulting for modern businesses.",
-  canonical = "https://codenexusstudio.vercel.app/",
+  title = "Top Web Development Agency in Mohali | c-square Studio",
+  description = "c-square Studio is a premier web development company in Mohali, Punjab offering custom React web apps, e-commerce solutions, and tech consulting for modern businesses.",
+  canonical = "https://csquare.vercel.app/",
   ogImage = "/og-image.png",
 }) => {
 
   // ✅ Base site URL (for social share absolute image)
-  const SITE_URL = "https://codenexusstudio.vercel.app";
+  const SITE_URL = "https://csquare.vercel.app";
 
   // ✅ Absolute OG Image URL (important for WhatsApp/LinkedIn share previews)
   const OG_IMAGE_ABS = ogImage.startsWith("http")
@@ -26,10 +26,10 @@ const SEO = ({
   const schemaOrganization = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "CodeNexus Studio",
-    alternateName: ["CodeNexus", "CodeNexus Studio"],
+    name: "c-square Studio",
+    alternateName: ["c-square", "c-square Studio"],
     url: SITE_URL + "/",
-    email: "codenexusstudio@gmail.com",
+    email: "csquare@gmail.com",
     telephone: "+918092701770",
     address: {
       "@type": "PostalAddress",
@@ -52,11 +52,11 @@ const SEO = ({
   const schemaLocalBusiness = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "CodeNexus Studio",
-    alternateName: ["CodeNexus", "CodeNexus Studio"],
+    name: "c-square Studio",
+    alternateName: ["c-square", "c-square Studio"],
     url: SITE_URL + "/",
     telephone: "+918092701770",
-    email: "codenexusstudio@gmail.com",
+    email: "csquare@gmail.com",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Mohali",
@@ -93,7 +93,7 @@ const SEO = ({
       {/* ✅ Keyword Boost for brand search */}
       <meta
         name="keywords"
-        content="codenexus, codenexus studio, princekrcoder, web development mohali, web development punjab, web applications, e-commerce development, portfolio websites, tech consulting"
+        content="c-square, c-square studio, princekrcoder, web development mohali, web development punjab, web applications, e-commerce development, portfolio websites, tech consulting"
       />
 
       {/* Recommended */}
@@ -112,7 +112,7 @@ const SEO = ({
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
 
-      <meta property="og:site_name" content="CodeNexus Studio" />
+      <meta property="og:site_name" content="c-square Studio" />
       <meta property="og:locale" content="en_IN" />
 
       {/* ✅ Twitter */}

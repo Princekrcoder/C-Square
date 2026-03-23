@@ -15,7 +15,7 @@ const CTA = () => {
 
                     <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-5 flex-wrap">
                         <Link to="/login" className="px-9 py-4 rounded-[16px] text-[1.1rem] font-[700] no-underline transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] inline-flex items-center justify-center gap-[10px] w-full md:w-auto bg-primary text-[#111111] shadow-[0_8px_20px_var(--tw-shadow-color)] shadow-[rgba(255,215,0,0.3)] hover:bg-primary hover:shadow-[0_10px_32px_rgba(255,215,0,0.3),0_0_0_2px_rgba(255,215,0,0.22)]">
-                            Join Now <span>🚀</span>
+                            Join Now
                         </Link>
                         <a href="#events" className="px-9 py-4 rounded-[16px] text-[1.1rem] font-[700] no-underline transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] inline-flex items-center justify-center gap-[10px] w-full md:w-auto bg-transparent text-textMain border border-subtleBorder hover:bg-subtleBg hover:shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
                             Explore Events

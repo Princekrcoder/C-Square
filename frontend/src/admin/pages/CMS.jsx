@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Pencil, Trash2, Plus, ToggleLeft, ToggleRight, FileText, BookOpen, Star, Zap, X, ExternalLink } from 'lucide-react'
 
 const TABS = [
@@ -8,54 +8,90 @@ const TABS = [
     { key: 'blog', label: 'Blog / Posts', Icon: FileText },
 ]
 
-const INIT_HIGHLIGHTS = [
-    { id: 1, title: 'Competitive Programming', desc: 'Weekly CP contests, LeetCode challenges, and Codeforces rounds to sharpen your problem-solving skills.', active: true, emoji: '🏆' },
-    { id: 2, title: 'Hands-on Workshops', desc: 'Practical workshops on Web Dev, AI/ML, DevOps, Git, and more — taught by club seniors and industry mentors.', active: true, emoji: '🛠️' },
-    { id: 3, title: 'Open Source Projects', desc: 'Collaborate on real club-run open-source projects that are used by the college community.', active: true, emoji: '🌐' },
-    { id: 4, title: 'Hackathons & Events', desc: 'Participate in national-level hackathons, coding challenges, and DevSprints organized by the club.', active: true, emoji: '⚡' },
-    { id: 5, title: 'Mentorship Program', desc: 'Get paired with senior club members for guidance on competitive programming, projects, and placements.', active: false, emoji: '🤝' },
-]
-
-const INIT_RESOURCES = [
-    { id: 1, title: 'CP Starter Roadmap', category: 'DSA', type: 'PDF Guide', link: '#', featured: true },
-    { id: 2, title: 'Web Dev with React', category: 'Web Dev', type: 'Tutorial Series', link: '#', featured: true },
-    { id: 3, title: 'Git & GitHub Basics', category: 'DevOps', type: 'Workshop Notes', link: '#', featured: false },
-    { id: 4, title: 'ML Foundations with Python', category: 'AI/ML', type: 'PDF Guide', link: '#', featured: true },
-    { id: 5, title: 'Interview Prep Sheet', category: 'DSA', type: 'Cheat Sheet', link: '#', featured: false },
-    { id: 6, title: 'Open Source Contribution Guide', category: 'General', type: 'Handbook', link: '#', featured: false },
-]
-
-const INIT_STORIES = [
-    { id: 1, name: 'Arjun Patel', batch: '2022', achievement: 'SDE Intern at Google via CP practice at C-Square', rating: 5, text: 'Regular CP contests at C-Square gave me the confidence to crack Google\'s coding rounds. The mentorship was phenomenal!' },
-    { id: 2, name: 'Meera Singh', batch: '2023', achievement: 'Open source contributor to Mozilla Firefox', rating: 5, text: 'I had zero open-source experience before joining. The club\'s project workflow and senior guidance got me my first merged PR in 2 months!' },
-    { id: 3, name: 'Vikram Rao', batch: '2022', achievement: 'Won HackIndia 2023 with club teammates', rating: 5, text: 'We formed a team within C-Square and won a national hackathon. Would not have been possible without the collaboration culture here.' },
-]
-
-const INIT_BLOG = [
-    { id: 1, title: 'How to Start Competitive Programming in 2026', date: '2026-03-10', status: 'Published', views: 540, category: 'DSA' },
-    { id: 2, title: 'Our Journey: Building the C-Square Club Website', date: '2026-02-28', status: 'Published', views: 320, category: 'Web Dev' },
-    { id: 3, title: 'Top Resources for Learning AI/ML from Scratch', date: '2026-02-15', status: 'Published', views: 215, category: 'AI/ML' },
-    { id: 4, title: 'What I Learned from Contributing to Open Source', date: '2026-01-20', status: 'Published', views: 180, category: 'General' },
-    { id: 5, title: 'DevSprint 2025 Recap — Our Biggest Hackathon Yet!', date: '2026-01-05', status: 'Published', views: 410, category: 'Events' },
-    { id: 6, title: 'Introduction to System Design for Beginners', date: '2026-03-14', status: 'Draft', views: 0, category: 'DSA' },
-]
-
-const CMS = () => {
+const CMS = ({ searchTerm = '' }) => {
     const [tab, setTab] = useState('highlights')
-    const [highlights, setHighlights] = useState(INIT_HIGHLIGHTS)
-    const [resources, setResources] = useState(INIT_RESOURCES)
-    const [stories, setStories] = useState(INIT_STORIES)
-    const [blog, setBlog] = useState(INIT_BLOG)
+    const [highlights, setHighlights] = useState([])
+    const [resources, setResources] = useState([])
+    const [stories, setStories] = useState([])
+    const [blog, setBlog] = useState([])
     const [editHighlight, setEditHighlight] = useState(null)
+    const [addModal, setAddModal] = useState(null) // 'resource' | 'story' | 'blog'
+    const [form, setForm] = useState({})
 
-    const toggleHighlight = (id) => setHighlights(h => h.map(i => i.id === id ? { ...i, active: !i.active } : i))
-    const deleteResource = (id) => setResources(r => r.filter(i => i.id !== id))
-    const toggleFeatured = (id) => setResources(r => r.map(i => i.id === id ? { ...i, featured: !i.featured } : i))
-    const deleteStory = (id) => setStories(s => s.filter(i => i.id !== id))
-    const toggleBlog = (id) => setBlog(b => b.map(p => p.id === id ? { ...p, status: p.status === 'Published' ? 'Draft' : 'Published' } : p))
-    const deleteBlog = (id) => setBlog(b => b.filter(p => p.id !== id))
+    useEffect(() => { fetchCMS() }, [])
+
+    const fetchCMS = async () => {
+        try {
+            const [hRes, rRes, sRes, bRes] = await Promise.all([
+                fetch('http://localhost:5000/api/cms/highlights'),
+                fetch('http://localhost:5000/api/cms/resources'),
+                fetch('http://localhost:5000/api/cms/stories'),
+                fetch('http://localhost:5000/api/cms/blog')
+            ])
+            if(hRes.ok) setHighlights(await hRes.json())
+            if(rRes.ok) setResources(await rRes.json())
+            if(sRes.ok) setStories(await sRes.json())
+            if(bRes.ok) setBlog(await bRes.json())
+        } catch (error) { console.error('CMS fetch failed:', error) }
+    }
+
+    const apiCall = async (endpoint, method, body = null) => {
+        const token = localStorage.getItem('token')
+        const opts = { method, headers: { 'Authorization': `Bearer ${token}` } }
+        if (body) {
+            opts.headers['Content-Type'] = 'application/json'
+            opts.body = JSON.stringify(body)
+        }
+        const res = await fetch(`http://localhost:5000/api/cms/${endpoint}`, opts)
+        if (res.ok) fetchCMS()
+        return res
+    }
+
+    const toggleHighlight = (id) => {
+        const h = highlights.find(i => i.id === id)
+        apiCall(`highlights/${id}`, 'PUT', { active: !h.active })
+    }
+    const saveHighlight = (h) => {
+        apiCall(`highlights/${h.id}`, 'PUT', { title: h.title, desc: h.desc })
+        setEditHighlight(null)
+    }
+    
+    const deleteResource = (id) => { if(confirm('Delete resource?')) apiCall(`resources/${id}`, 'DELETE') }
+    const toggleFeatured = (id) => {
+        const r = resources.find(i => i.id === id)
+        apiCall(`resources/${id}`, 'PUT', { featured: !r.featured })
+    }
+    
+    const deleteStory = (id) => { if(confirm('Delete story?')) apiCall(`stories/${id}`, 'DELETE') }
+    
+    const toggleBlog = (id) => {
+        const b = blog.find(p => p.id === id)
+        apiCall(`blog/${id}`, 'PUT', { status: b.status === 'Published' ? 'Draft' : 'Published' })
+    }
+    const deleteBlog = (id) => { if(confirm('Delete post?')) apiCall(`blog/${id}`, 'DELETE') }
+
+    const openModal = (type) => {
+        setAddModal(type)
+        if (type === 'resource') setForm({ title: '', category: 'DSA', type: 'PDF Guide', link: '#' })
+        if (type === 'story') setForm({ name: '', batch: '', achievement: '', text: '' })
+        if (type === 'blog') setForm({ title: '', category: 'DSA', date: new Date().toISOString().split('T')[0] })
+    }
+    const saveModal = async () => {
+        if (!form.title && !form.name) return
+        await apiCall(addModal === 'resource' ? 'resources' : addModal === 'story' ? 'stories' : 'blog', 'POST', form)
+        setAddModal(null)
+    }
 
     const CAT_COLORS = { DSA: 'badge-blue', 'Web Dev': 'badge-cyan', 'AI/ML': 'badge-purple', 'DevOps': 'badge-orange', General: 'badge-gray', Events: 'badge-green' }
+
+    const filterList = (list, textFields) => list.filter(item => 
+        !searchTerm || textFields.some(tf => (item[tf] || '').toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+
+    const hList = filterList(highlights, ['title', 'desc'])
+    const rList = filterList(resources, ['title', 'category'])
+    const sList = filterList(stories, ['name', 'achievement'])
+    const bList = filterList(blog, ['title', 'category'])
 
     return (
         <>
@@ -85,16 +121,16 @@ const CMS = () => {
                             <p style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', margin: 0 }}>Showing on homepage — toggle to show/hide each highlight</p>
                         </div>
                     </div>
-                    {highlights.map(h => (
+                    {hList.map(h => (
                         <div key={h.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '1rem 1.25rem', borderBottom: '1px solid var(--admin-border)' }}>
                             {editHighlight === h.id ? (
                                 <>
                                     <span style={{ fontSize: '1.4rem' }}>{h.emoji}</span>
                                     <input value={h.title} onChange={e => setHighlights(hl => hl.map(i => i.id === h.id ? { ...i, title: e.target.value } : i))}
                                         style={{ flex: 1, background: 'var(--admin-surface2)', border: '1px solid var(--admin-border)', borderRadius: 8, padding: '5px 10px', color: 'var(--admin-text)', fontFamily: 'Outfit,sans-serif' }} />
-                                    <input value={h.desc} onChange={e => setHighlights(hl => hl.map(i => i.id === h.id ? { ...i, desc: e.target.value } : i))}
+                                    <input value={h.desc || ''} onChange={e => setHighlights(hl => hl.map(i => i.id === h.id ? { ...i, desc: e.target.value } : i))}
                                         style={{ flex: 3, background: 'var(--admin-surface2)', border: '1px solid var(--admin-border)', borderRadius: 8, padding: '5px 10px', color: 'var(--admin-text)', fontFamily: 'Outfit,sans-serif' }} />
-                                    <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '5px 12px' }} onClick={() => setEditHighlight(null)}>Save</button>
+                                    <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '5px 12px' }} onClick={() => saveHighlight(h)}>Save</button>
                                 </>
                             ) : (
                                 <>
@@ -125,11 +161,11 @@ const CMS = () => {
                             <h3>Learning Resources</h3>
                             <p style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', margin: 0 }}>Guides, roadmaps, and notes shared with club members</p>
                         </div>
-                        <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 5 }} onClick={() => openModal('resource')}>
                             <Plus size={13} /> Add Resource
                         </button>
                     </div>
-                    {resources.map(r => (
+                    {rList.map(r => (
                         <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '1rem 1.25rem', borderBottom: '1px solid var(--admin-border)' }}>
                             <div style={{ width: 38, height: 38, borderRadius: 10, background: 'var(--admin-surface2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                 <BookOpen size={16} color="var(--admin-primary)" />
@@ -157,7 +193,7 @@ const CMS = () => {
             {/* ── Member Stories ── */}
             {tab === 'stories' && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(310px,1fr))', gap: '1rem' }}>
-                    {stories.map(s => (
+                    {sList.map(s => (
                         <div key={s.id} className="admin-stat-card" style={{ padding: '1.25rem' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: '0.75rem' }}>
                                 <div className="team-avatar" style={{ width: 38, height: 38, fontSize: '0.8rem' }}>{s.name.split(' ').map(n => n[0]).join('')}</div>
@@ -176,7 +212,8 @@ const CMS = () => {
                             </div>
                         </div>
                     ))}
-                    <div className="admin-stat-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 200, border: '2px dashed var(--admin-border)', cursor: 'pointer' }}>
+                    <div className="admin-stat-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, minHeight: 200, border: '2px dashed var(--admin-border)', cursor: 'pointer' }}
+                        onClick={() => openModal('story')}>
                         <Plus size={24} color="var(--admin-muted)" />
                         <span style={{ color: 'var(--admin-muted)', fontSize: '0.85rem' }}>Add Member Story</span>
                     </div>
@@ -191,7 +228,7 @@ const CMS = () => {
                             <h3>Blog Posts</h3>
                             <p style={{ fontSize: '0.78rem', color: 'var(--admin-muted)', margin: 0 }}>Articles, tutorials, and announcements for club members</p>
                         </div>
-                        <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                        <button className="btn-primary" style={{ fontSize: '0.8rem', padding: '6px 14px', display: 'flex', alignItems: 'center', gap: 5 }} onClick={() => openModal('blog')}>
                             <Plus size={13} /> New Post
                         </button>
                     </div>
@@ -199,7 +236,7 @@ const CMS = () => {
                         <table className="admin-table">
                             <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
                             <tbody>
-                                {blog.map(p => (
+                                {bList.map(p => (
                                     <tr key={p.id}>
                                         <td><strong style={{ fontSize: '0.875rem' }}>{p.title}</strong></td>
                                         <td><span className={`badge ${CAT_COLORS[p.category] || 'badge-gray'}`} style={{ fontSize: '0.68rem' }}>{p.category}</span></td>
@@ -219,6 +256,49 @@ const CMS = () => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+            
+            {/* Generic Add Modal */}
+            {addModal && (
+                <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && setAddModal(null)}>
+                    <div className="admin-modal">
+                        <div className="admin-modal-header">
+                            <h3>Add {addModal === 'resource' ? 'Resource' : addModal === 'story' ? 'Story' : 'Post'}</h3>
+                            <button className="btn-icon" onClick={() => setAddModal(null)}><X size={16} /></button>
+                        </div>
+                        <div className="admin-modal-body">
+                            <div className="admin-form-grid">
+                                {addModal === 'resource' && (
+                                    <>
+                                        <div className="admin-form-group full"><label>Title</label><input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+                                        <div className="admin-form-group"><label>Category</label><input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} /></div>
+                                        <div className="admin-form-group"><label>Type</label><input value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} /></div>
+                                        <div className="admin-form-group full"><label>Link</label><input value={form.link} onChange={e => setForm({ ...form, link: e.target.value })} /></div>
+                                    </>
+                                )}
+                                {addModal === 'story' && (
+                                    <>
+                                        <div className="admin-form-group full"><label>Member Name</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+                                        <div className="admin-form-group"><label>Batch</label><input type="text" inputMode="numeric" placeholder="e.g. 2027" value={form.batch} onChange={e => setForm({ ...form, batch: e.target.value.replace(/\D/g, '').slice(0, 4) })} /></div>
+                                        <div className="admin-form-group"><label>Achievement</label><input value={form.achievement} onChange={e => setForm({ ...form, achievement: e.target.value })} /></div>
+                                        <div className="admin-form-group full"><label>Testimonial / Story text</label><textarea value={form.text} onChange={e => setForm({ ...form, text: e.target.value })} style={{ width: '100%', minHeight: 80, background: 'var(--admin-surface2)', border: '1px solid var(--admin-border)', borderRadius: 8, padding: 10, color: 'var(--admin-text)' }} /></div>
+                                    </>
+                                )}
+                                {addModal === 'blog' && (
+                                    <>
+                                        <div className="admin-form-group full"><label>Title</label><input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
+                                        <div className="admin-form-group"><label>Category</label><input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} /></div>
+                                        <div className="admin-form-group"><label>Date</label><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className="admin-modal-footer">
+                            <button className="btn-ghost" onClick={() => setAddModal(null)}>Cancel</button>
+                            <button className="btn-primary" onClick={saveModal}>Save {addModal}</button>
+                        </div>
                     </div>
                 </div>
             )}

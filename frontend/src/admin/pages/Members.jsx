@@ -37,9 +37,9 @@ const SAMPLE_MEMBERS = [
     { id: 12, name: 'Pooja Jaiswal', email: 'pooja.j@example.com', phone: '9823112233', track: 'Web Dev', role: 'Member', batch: '2025', github: '', linkedin: '', status: 'Pending', joinDate: '2025-02-01' },
 ]
 
-const Clients = () => {
+const Clients = ({ searchTerm = '' }) => {
     const navigate = useNavigate()
-    const [clients, setClients] = useState(SAMPLE_MEMBERS)
+    const [clients, setClients] = useState([])
     const [loading, setLoading] = useState(true)
     const [statusFilter, setStatusFilter] = useState('All')
     const [trackFilter, setTrackFilter] = useState('All')
@@ -55,7 +55,18 @@ const Clients = () => {
     }, [])
 
     const fetchClients = async () => {
-        setLoading(false)
+        setLoading(true)
+        try {
+            const res = await fetch('http://localhost:5000/api/members')
+            if (res.ok) {
+                const data = await res.json()
+                setClients(data)
+            }
+        } catch (err) {
+            console.error(err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const openAdd = () => { setEditing(null); setForm(empty); setModal(true) }
@@ -83,30 +94,44 @@ const Clients = () => {
             const clientData = {
                 ...form
             }
-            
+            const token = localStorage.getItem('token')
             if (editing) {
-                await clientsAPI.update(editing, clientData)
+                const res = await fetch(`http://localhost:5000/api/members/${editing}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(clientData)
+                })
+                if (res.ok) await fetchClients()
             } else {
-                await clientsAPI.create(clientData)
+                const res = await fetch('http://localhost:5000/api/members', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(clientData)
+                })
+                if (res.ok) await fetchClients()
             }
             
-            await fetchClients()
             setModal(false)
         } catch (error) {
-            console.error('Failed to save client:', error)
-            alert(error.message || 'Failed to save client')
+            console.error('Failed to save member:', error)
+            alert(error.message || 'Failed to save member')
         } finally {
             setSaving(false)
         }
     }
     
     const disable = async (id) => {
-        if (confirm('Disable this client?')) {
+        if (confirm('Disable this member?')) {
             try {
-                await clientsAPI.update(id, { status: 'Banned' })
-                await fetchClients()
+                const token = localStorage.getItem('token')
+                const res = await fetch(`http://localhost:5000/api/members/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ status: 'Banned' })
+                })
+                if (res.ok) await fetchClients()
             } catch (error) {
-                console.error('Failed to disable client:', error)
+                console.error('Failed to disable member:', error)
             }
         }
     }
@@ -119,9 +144,10 @@ const Clients = () => {
         const mS = statusFilter === 'All' || c.status === statusFilter
         const mT = trackFilter === 'All' || c.track === trackFilter
         const mP = roleFilter === 'All' || c.role === roleFilter
-        const mQ = c.name.toLowerCase().includes(search.toLowerCase()) ||
-            c.email.toLowerCase().includes(search.toLowerCase()) ||
-            (c.batch || '').toLowerCase().includes(search.toLowerCase())
+        const activeSearch = searchTerm || search
+        const mQ = !activeSearch || c.name.toLowerCase().includes(activeSearch.toLowerCase()) ||
+            c.email.toLowerCase().includes(activeSearch.toLowerCase()) ||
+            (c.batch || '').toLowerCase().includes(activeSearch.toLowerCase())
         return mS && mT && mP && mQ
     })
 
@@ -231,7 +257,7 @@ const Clients = () => {
                                 <div className="admin-form-group full"><label>Full Name *</label><input placeholder="Member name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
                                 <div className="admin-form-group"><label>Email *</label><input type="email" placeholder="email@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
                                 <div className="admin-form-group"><label>Phone</label><input placeholder="+91 XXXXX XXXXX" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
-                                <div className="admin-form-group"><label>Batch (Year of Graduation)</label><input placeholder="e.g. 2027" value={form.batch} onChange={e => setForm({ ...form, batch: e.target.value })} /></div>
+                                <div className="admin-form-group"><label>Batch (Year of Graduation)</label><input type="text" inputMode="numeric" placeholder="e.g. 2027" value={form.batch} onChange={e => setForm({ ...form, batch: e.target.value.replace(/\D/g, '').slice(0, 4) })} /></div>
                                 <div className="admin-form-group"><label>Team / Track</label>
                                     <select value={form.track} onChange={e => setForm({ ...form, track: e.target.value })}>
                                         {TRACKS.filter(t => t !== 'All').map(t => <option key={t}>{t}</option>)}

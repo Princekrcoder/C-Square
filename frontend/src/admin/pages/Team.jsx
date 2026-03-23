@@ -12,72 +12,101 @@ const TASK_COLS = [
     { key: 'Done', label: 'Done', Icon: CheckCircle, iconClass: 'badge-green' },
 ]
 
-const SAMPLE_TEAM = [
-    { id: 1, name: 'Aarav Sharma', role: 'Club Lead', email: 'aarav@csquare.club', phone: '9876543210', status: 'Active' },
-    { id: 2, name: 'Rohan Mehta', role: 'Tech Lead', email: 'rohan@csquare.club', phone: '9867788990', status: 'Active' },
-    { id: 3, name: 'Priya Gupta', role: 'Tech Lead', email: 'priya@csquare.club', phone: '9812345678', status: 'Active' },
-    { id: 4, name: 'Meera Singh', role: 'Design Lead', email: 'meera@csquare.club', phone: '9844112233', status: 'Active' },
-    { id: 5, name: 'Karan Joshi', role: 'Event Coordinator', email: 'karan@csquare.club', phone: '9855566778', status: 'Active' },
-    { id: 6, name: 'Neha Bhat', role: 'PR/Marketing', email: 'neha@csquare.club', phone: '9866677889', status: 'Active' },
-]
-
-const SAMPLE_TASKS = [
-    { id: 1, title: 'Finalize March Workshop agenda', assignee: 'Karan Joshi', priority: 'High', status: 'In Progress', due: '2026-03-18' },
-    { id: 2, title: 'Post recruitment banner on Instagram', assignee: 'Neha Bhat', priority: 'Medium', status: 'Todo', due: '2026-03-16' },
-    { id: 3, title: 'Update website with new events', assignee: 'Rohan Mehta', priority: 'High', status: 'In Progress', due: '2026-03-15' },
-    { id: 4, title: 'Design event poster for DevSprint', assignee: 'Meera Singh', priority: 'High', status: 'Todo', due: '2026-03-20' },
-    { id: 5, title: 'Review new member applications', assignee: 'Aarav Sharma', priority: 'Medium', status: 'Done', due: '2026-03-10' },
-    { id: 6, title: 'Setup Codeforces contest round', assignee: 'Priya Gupta', priority: 'High', status: 'Done', due: '2026-03-12' },
-    { id: 7, title: 'Create onboarding docs for new members', assignee: 'Neha Bhat', priority: 'Low', status: 'Todo', due: '2026-03-30' },
-    { id: 8, title: 'Coordinate with college for Auditorium booking', assignee: 'Karan Joshi', priority: 'Medium', status: 'In Progress', due: '2026-03-19' },
-]
-
-const Team = () => {
-    const [team, setTeam] = useState(SAMPLE_TEAM)
-    const [tasks, setTasks] = useState(SAMPLE_TASKS)
+const Team = ({ searchTerm = '' }) => {
+    const [team, setTeam] = useState([])
+    const [tasks, setTasks] = useState([])
     const [loading, setLoading] = useState(true)
     const [modal, setModal] = useState(false)
     const [editing, setEditing] = useState(null)
     const [form, setForm] = useState({ name: '', role: 'Tech Lead', email: '', phone: '' })
+    const [taskForm, setTaskForm] = useState({ title: '', assignee: '', priority: 'Medium', due: '' })
     const [tab, setTab] = useState('team')
     const [saving, setSaving] = useState(false)
+    const [taskModal, setTaskModal] = useState(false)
 
     useEffect(() => {
         fetchTeam()
     }, [])
 
     const fetchTeam = async () => {
-        setLoading(false)
+        setLoading(true)
+        try {
+            const [teamRes, taskRes] = await Promise.all([
+                fetch('http://localhost:5000/api/team'),
+                fetch('http://localhost:5000/api/tasks')
+            ])
+            if (teamRes.ok) setTeam(await teamRes.json())
+            if (taskRes.ok) setTasks(await taskRes.json())
+        } catch (error) {
+            console.error('Failed to fetch team data', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const openAdd = () => { setEditing(null); setForm({ name: '', role: 'Tech Lead', email: '', phone: '' }); setModal(true) }
-    const openEdit = (m) => { 
-        setEditing(m.id)
-        setForm({ 
-            name: m.name, 
-            role: m.role, 
-            email: m.email, 
-            phone: m.phone || '' 
-        })
-        setModal(true) 
-    }
-    const save = () => {
+    const openAddTask = () => { setEditing(null); setTaskForm({ title: '', assignee: '', priority: 'Medium', due: '' }); setTaskModal(true) }
+    
+    const save = async () => {
         if (!form.name.trim()) return
-        setSaving(true)
-        if (editing) {
-            setTeam(prev => prev.map(t => t.id === editing ? { ...t, ...form } : t))
-        } else {
-            setTeam(prev => [{ id: Date.now(), ...form, status: 'Active' }, ...prev])
+        try {
+            setSaving(true)
+            const token = localStorage.getItem('token')
+            const dataToSave = { ...form }
+            
+            const url = editing ? `http://localhost:5000/api/team/${editing}` : 'http://localhost:5000/api/team'
+            const method = editing ? 'PUT' : 'POST'
+            
+            const res = await fetch(url, {
+                method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(dataToSave)
+            })
+            if (res.ok) await fetchTeam()
+            setModal(false)
+        } catch (e) {
+            console.error(e)
+        } finally {
+            setSaving(false)
         }
-        setModal(false)
-        setSaving(false)
     }
+
+    const saveTask = async () => {
+        if (!taskForm.title.trim()) return
+        try {
+            setSaving(true)
+            const token = localStorage.getItem('token')
+            const res = await fetch('http://localhost:5000/api/tasks', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(taskForm)
+            })
+            if (res.ok) await fetchTeam()
+            setTaskModal(false)
+        } catch (e) { console.error(e) } finally { setSaving(false) }
+    }
+
     const remove = async (id) => { 
         if (confirm('Remove team member?')) {
-            setTeam(prev => prev.filter(t => t.id !== id))
+            try {
+                const token = localStorage.getItem('token')
+                await fetch(`http://localhost:5000/api/team/${id}`, {
+                    method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                })
+                await fetchTeam()
+            } catch (e) { console.error(e) }
         }
     }
-    const moveTask = (id, newStatus) => setTasks(ts => ts.map(t => t.id === id ? { ...t, status: newStatus } : t))
+    
+    const moveTask = async (id, newStatus) => {
+        try {
+            const token = localStorage.getItem('token')
+            setTasks(ts => ts.map(t => t.id === id ? { ...t, status: newStatus } : t))
+            
+            await fetch(`http://localhost:5000/api/tasks/${id}`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status: newStatus })
+            })
+        } catch (e) { console.error(e); await fetchTeam() }
+    }
 
     if (loading) {
         return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px', color: 'var(--admin-muted)' }}>Loading team...</div>
@@ -99,6 +128,7 @@ const Team = () => {
                         ))}
                     </div>
                     {tab === 'team' && <button className="btn-primary" onClick={openAdd}><Plus size={14} /> Add Member</button>}
+                    {tab === 'tasks' && <button className="btn-primary" onClick={openAddTask}><Plus size={14} /> Add Task</button>}
                 </div>
             </div>
 
@@ -109,7 +139,7 @@ const Team = () => {
                         <table className="admin-table">
                             <thead><tr><th>Member</th><th>Role</th><th>Email</th><th>Phone</th><th>Tasks</th><th>Joined</th><th>Actions</th></tr></thead>
                             <tbody>
-                                {team.map(m => (
+                                {team.filter(m => !searchTerm || m.name.toLowerCase().includes(searchTerm.toLowerCase()) || m.role.toLowerCase().includes(searchTerm.toLowerCase())).map(m => (
                                     <tr key={m.id}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -140,7 +170,7 @@ const Team = () => {
             {tab === 'tasks' && (
                 <div className="kanban-board">
                     {TASK_COLS.map(col => {
-                        const colTasks = tasks.filter(t => t.status === col.key)
+                        const colTasks = tasks.filter(t => t.status === col.key && (!searchTerm || t.title.toLowerCase().includes(searchTerm.toLowerCase()) || (t.assignee || '').toLowerCase().includes(searchTerm.toLowerCase())))
                         return (
                             <div className="kanban-col" key={col.key}>
                                 <div className="kanban-col-header">
@@ -192,6 +222,26 @@ const Team = () => {
                         <div className="admin-modal-footer">
                             <button className="btn-ghost" onClick={() => setModal(false)}>Cancel</button>
                             <button className="btn-primary" onClick={save}>{editing ? 'Save' : 'Add'}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Task Modal */}
+            {taskModal && (
+                <div className="admin-modal-overlay" onClick={e => e.target === e.currentTarget && setTaskModal(false)}>
+                    <div className="admin-modal">
+                        <div className="admin-modal-header"><h3>Add Task</h3><button className="btn-icon" onClick={() => setTaskModal(false)}><X size={16} /></button></div>
+                        <div className="admin-modal-body">
+                            <div className="admin-form-grid">
+                                <div className="admin-form-group full"><label>Task Title *</label><input placeholder="To do..." value={taskForm.title} onChange={e => setTaskForm({ ...taskForm, title: e.target.value })} /></div>
+                                <div className="admin-form-group"><label>Assignee</label><input placeholder="Name" value={taskForm.assignee} onChange={e => setTaskForm({ ...taskForm, assignee: e.target.value })} /></div>
+                                <div className="admin-form-group"><label>Priority</label><select value={taskForm.priority} onChange={e => setTaskForm({ ...taskForm, priority: e.target.value })}><option>High</option><option>Medium</option><option>Low</option></select></div>
+                                <div className="admin-form-group full"><label>Due Date</label><input type="date" value={taskForm.due} onChange={e => setTaskForm({ ...taskForm, due: e.target.value })} /></div>
+                            </div>
+                        </div>
+                        <div className="admin-modal-footer">
+                            <button className="btn-ghost" onClick={() => setTaskModal(false)}>Cancel</button>
+                            <button className="btn-primary" onClick={saveTask}>Add Task</button>
                         </div>
                     </div>
                 </div>

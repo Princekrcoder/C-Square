@@ -4,7 +4,7 @@ import {
     LayoutDashboard, Users, FolderKanban, Inbox, CreditCard,
     Users2, PenSquare, Settings, LogOut, ChevronRight,
     Menu, Search, Bell, Sun, Moon, Globe, ChevronDown,
-    TrendingUp, AlertCircle, CheckCircle2, RefreshCcw, BarChart3
+    TrendingUp, AlertCircle, CheckCircle2, RefreshCcw, BarChart3, Shield
 } from 'lucide-react'
 import '../styles/AdminLayout.css'
 
@@ -16,18 +16,20 @@ import Team from './pages/Team'
 import CMS from './pages/CMS'
 import Settings2 from './pages/Settings'
 import ClientDetail from './pages/MemberDetail' // Map to MemberDetail.jsx
+import UsersAdmin from './pages/Users'
 
 const NAV = [
     { section: 'Main' },
     { path: '/admin', label: 'Dashboard', Icon: LayoutDashboard },
     { section: 'Club Management' },
-    { path: '/admin/members', label: 'Members', Icon: Users, badge: 12 },
-    { path: '/admin/events', label: 'Events', Icon: FolderKanban, badge: 3 },
-    { path: '/admin/projects', label: 'Projects', Icon: Inbox, badge: 2 },
+    { path: '/admin/members', label: 'Members', Icon: Users },
+    { path: '/admin/events', label: 'Events', Icon: FolderKanban },
+    { path: '/admin/projects', label: 'Projects', Icon: Inbox },
     { section: 'Operations' },
     { path: '/admin/team', label: 'Core Team', Icon: Users2 },
     { path: '/admin/cms', label: 'CMS', Icon: PenSquare },
     { section: 'System' },
+    { path: '/admin/users', label: 'System Users', Icon: Shield },
     { path: '/admin/settings', label: 'Settings', Icon: Settings },
 ]
 
@@ -38,29 +40,69 @@ const PAGE_TITLES = {
     '/admin/projects': { title: 'Open Source Projects', subtitle: 'Track club open-source initiatives' },
     '/admin/team': { title: 'Core Committee', subtitle: 'Manage the core team' },
     '/admin/cms': { title: 'Content Management', subtitle: 'Edit website content' },
+    '/admin/users': { title: 'System Users', subtitle: 'Manage admins and account access' },
     '/admin/settings': { title: 'Settings', subtitle: 'Configure club profile' },
 }
 
-const NOTIFICATIONS = [
-    { id: 1, Icon: TrendingUp, iconClass: 'green', title: 'New member registered', desc: 'Rishabh Kumar — Web Dev Track', time: '5 min ago', unread: true },
-    { id: 2, Icon: CheckCircle2, iconClass: 'green', title: 'Workshop scheduled', desc: 'Intro to React — Tomorrow, 5 PM', time: '2 hrs ago', unread: true },
-    { id: 3, Icon: RefreshCcw, iconClass: 'blue', title: 'Project PR merged', desc: 'CSquare Website — Homepage redesign', time: '4 hrs ago', unread: false },
-    { id: 4, Icon: AlertCircle, iconClass: 'orange', title: 'Hackathon closing', desc: 'Winter of Code registration — 5 days left', time: 'Yesterday', unread: false },
-]
 
 const AdminLayout = ({ theme, toggleTheme }) => {
     const [collapsed, setCollapsed] = useState(false)
     const [mobileOpen, setMobileOpen] = useState(false)
     const [notifOpen, setNotifOpen] = useState(false)
+    const [notifications, setNotifications] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
     const navigate = useNavigate()
     const location = useLocation()
     const notifRef = useRef(null)
 
+    // Check auth
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const storedUserstr = localStorage.getItem('user');
+        
+        if (!token || !storedUserstr) {
+            navigate('/login');
+            return;
+        }
+        
+        try {
+            const storedUser = JSON.parse(storedUserstr);
+            if (storedUser.role !== 'admin') {
+               navigate('/');
+            }
+        } catch (e) {
+            navigate('/login');
+        }
+    }, [navigate]);
+
     // Hardcode user for UI purposes since backend/auth is removed
-    const user = { name: 'C-Square Admin', role: 'Admin' }
+    const storedUser = localStorage.getItem('user');
+    const userObj = storedUser ? JSON.parse(storedUser) : { name: 'Admin', role: 'admin' };
+    const user = { name: userObj.name || 'C-Square Admin', role: userObj.role === 'admin' ? 'Admin' : 'Member' };
 
     const pageInfo = PAGE_TITLES[location.pathname] || { title: 'Admin', subtitle: '' }
-    const unreadCount = NOTIFICATIONS.filter(n => n.unread).length
+    const unreadCount = notifications.filter(n => n.unread).length
+
+    useEffect(() => {
+        const fetchNotifs = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const res = await fetch('http://localhost:5000/api/dashboard/stats', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const feed = [
+                        ...data.recentLeads.map(l => ({ id: `l-${l.id}`, Icon: Users, iconClass: 'blue', title: 'New Registration', desc: l.name, time: new Date(l.created_at || Date.now()).toLocaleDateString(), unread: l.status === 'Pending' })),
+                        ...data.recentProjects.map(p => ({ id: `p-${p.id}`, Icon: FolderKanban, iconClass: 'green', title: 'New Project', desc: p.name, time: new Date(p.deadline || Date.now()).toLocaleDateString(), unread: p.status === 'Pending' }))
+                    ].slice(0, 4);
+                    setNotifications(feed);
+                }
+            } catch (err) {}
+        };
+        fetchNotifs();
+    }, [location.pathname]);
 
     useEffect(() => {
         const h = (e) => { if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false) }
@@ -75,7 +117,9 @@ const AdminLayout = ({ theme, toggleTheme }) => {
     }
 
     const handleLogout = () => {
-        // Just redirect to homepage since auth is gone
+        // Clear auth
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         navigate('/')
     }
 
@@ -161,7 +205,11 @@ const AdminLayout = ({ theme, toggleTheme }) => {
 
                     <div className="admin-topbar-search">
                         <Search size={15} className="search-icon" />
-                        <input placeholder="Search clients, projects…" />
+                        <input 
+                            placeholder="Search active page…" 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
                     </div>
 
                     <div className="admin-topbar-actions">
@@ -185,7 +233,9 @@ const AdminLayout = ({ theme, toggleTheme }) => {
                                         <h4>Notifications</h4>
                                         <span className="badge badge-red">{unreadCount} new</span>
                                     </div>
-                                    {NOTIFICATIONS.map(n => {
+                                    {notifications.length === 0 ? (
+                                        <div style={{ padding: 20, textAlign: 'center', color: 'var(--admin-muted)', fontSize: '0.8rem' }}>No new notifications</div>
+                                    ) : notifications.map(n => {
                                         const { Icon: NIcon } = n
                                         return (
                                             <div className="notif-item" key={n.id} style={{ opacity: n.unread ? 1 : 0.65 }}>
@@ -211,13 +261,14 @@ const AdminLayout = ({ theme, toggleTheme }) => {
                 {/* Page content */}
                 <main className="admin-main">
                     <Routes>
-                        <Route path="/" element={<Dashboard navigate={navigate} />} />
-                        <Route path="/members" element={<Clients />} />
-                        <Route path="/members/:id" element={<ClientDetail />} />
-                        <Route path="/events" element={<Events />} />
-                        <Route path="/projects" element={<Projects />} />
-                        <Route path="/team" element={<Team />} />
-                        <Route path="/cms" element={<CMS />} />
+                        <Route path="/" element={<Dashboard navigate={navigate} searchTerm={searchTerm} />} />
+                        <Route path="/members" element={<Clients searchTerm={searchTerm} />} />
+                        <Route path="/members/:id" element={<ClientDetail searchTerm={searchTerm} />} />
+                        <Route path="/events" element={<Events searchTerm={searchTerm} />} />
+                        <Route path="/projects" element={<Projects searchTerm={searchTerm} />} />
+                        <Route path="/team" element={<Team searchTerm={searchTerm} />} />
+                        <Route path="/cms" element={<CMS searchTerm={searchTerm} />} />
+                        <Route path="/users" element={<UsersAdmin searchTerm={searchTerm} />} />
                         <Route path="/settings" element={<Settings2 theme={theme} toggleTheme={toggleTheme} />} />
                     </Routes>
                 </main>

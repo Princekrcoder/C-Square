@@ -14,17 +14,8 @@ const ThemeBadge = ({ s }) => {
     return <span className={`badge ${m[s] || 'badge-gray'}`}>{s}</span>
 }
 
-const SAMPLE_PROJECTS = [
-    { id: 1, name: 'C-Square Official Website', leader: 'Rohan Mehta', theme: 'Web Dev', status: 'In Progress', deadline: '2026-04-30', repo: 'https://github.com/csquare/website', progress: 75 },
-    { id: 2, name: 'CP Judge Platform', leader: 'Rishabh Kumar', theme: 'Web Dev', status: 'In Progress', deadline: '2026-05-15', repo: 'https://github.com/csquare/cpjudge', progress: 45 },
-    { id: 3, name: 'Attendance Tracker App', leader: 'Meera Singh', theme: 'App Dev', status: 'Pending', deadline: '2026-06-01', repo: 'https://github.com/csquare/attendance', progress: 10 },
-    { id: 4, name: 'ML Paper Summarizer', leader: 'Priya Gupta', theme: 'AI/ML', status: 'In Progress', deadline: '2026-04-20', repo: 'https://github.com/csquare/ml-summarizer', progress: 60 },
-    { id: 5, name: 'Club Resource Portal', leader: 'Aarav Sharma', theme: 'Web Dev', status: 'Delivered', deadline: '2025-12-15', repo: 'https://github.com/csquare/resources', progress: 100 },
-    { id: 6, name: 'Chatbot for FAQs', leader: 'Ananya Das', theme: 'AI/ML', status: 'Pending', deadline: '2026-07-01', repo: '', progress: 5 },
-]
-
-const Projects = () => {
-    const [projects, setProjects] = useState(SAMPLE_PROJECTS)
+const Projects = ({ searchTerm = '' }) => {
+    const [projects, setProjects] = useState([])
     const [loading, setLoading] = useState(true)
     const [statusFilter, setStatus] = useState('All')
     const [themeFilter, setTheme] = useState('All')
@@ -40,7 +31,18 @@ const Projects = () => {
     }, [])
 
     const fetchProjects = async () => {
-        setLoading(false)
+        setLoading(true)
+        try {
+            const res = await fetch('http://localhost:5000/api/projects')
+            if (res.ok) {
+                const data = await res.json()
+                setProjects(data)
+            }
+        } catch (error) {
+            console.error('Failed to fetch projects', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const openAdd = () => { setEditing(null); setForm(emptyForm); setModal(true) }
@@ -60,37 +62,73 @@ const Projects = () => {
     const save = async () => {
         if (!form.name.trim()) return
         
-        setSaving(true)
-        const projectData = {
-            name: form.name,
-            leader: form.leader,
-            theme: form.theme, 
-            status: form.status,
-            deadline: form.deadline,
-            repo: form.repo, 
-            progress: Number(form.progress)
+        try {
+            setSaving(true)
+            const token = localStorage.getItem('token')
+            const projectData = {
+                name: form.name,
+                leader: form.leader,
+                theme: form.theme, 
+                status: form.status,
+                deadline: form.deadline || null,
+                repo: form.repo, 
+                progress: Number(form.progress)
+            }
+            
+            if (editing) {
+                const res = await fetch(`http://localhost:5000/api/projects/${editing}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(projectData)
+                })
+                if (res.ok) await fetchProjects()
+            } else {
+                const res = await fetch('http://localhost:5000/api/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(projectData)
+                })
+                if (res.ok) await fetchProjects()
+            }
+            
+            setModal(false)
+        } catch (error) {
+            console.error('Failed to save project:', error)
+        } finally {
+            setSaving(false)
         }
-        
-        if (editing) {
-            setProjects(prev => prev.map(p => p.id === editing ? { ...p, ...projectData } : p))
-        } else {
-            setProjects(prev => [{ id: Date.now(), ...projectData }, ...prev])
-        }
-        
-        setSaving(false)
-        setModal(false)
     }
     const remove = async (id) => { 
         if (confirm('Delete project?')) {
-            setProjects(prev => prev.filter(p => p.id !== id))
+            try {
+                const token = localStorage.getItem('token')
+                const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (res.ok) await fetchProjects()
+            } catch (error) {
+                console.error('Failed to delete project:', error)
+            }
         }
     }
     const moveKanban = async (id, newStatus) => {
         try {
-            await projectsAPI.update(id, { status: newStatus })
-            await fetchProjects()
+            const token = localStorage.getItem('token')
+            const projectToUpdate = projects.find(p => p.id === id)
+            if (!projectToUpdate) return
+            
+            setProjects(prev => prev.map(p => p.id === id ? { ...p, status: newStatus } : p)) // Optimistic UI
+            
+            const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ ...projectToUpdate, status: newStatus })
+            })
+            if (!res.ok) await fetchProjects() // Revert on failure
         } catch (error) {
             console.error('Failed to update project status:', error)
+            await fetchProjects()
         }
     }
 
@@ -100,9 +138,10 @@ const Projects = () => {
 
     const filtered = projects.filter(p => {
         const mS = statusFilter === 'All' || p.status === statusFilter
-        const mSv = themeFilter === 'All' || p.service === themeFilter
-        const leaderName = p.clientId || ''
-        const mSr = p.name.toLowerCase().includes(search.toLowerCase()) || leaderName.toLowerCase().includes(search.toLowerCase())
+        const mSv = themeFilter === 'All' || p.theme === themeFilter
+        const leaderName = p.leader || ''
+        const activeSearch = searchTerm || search
+        const mSr = !activeSearch || (p.name || '').toLowerCase().includes(activeSearch.toLowerCase()) || leaderName.toLowerCase().includes(activeSearch.toLowerCase())
         return mS && mSv && mSr
     })
 
@@ -169,8 +208,8 @@ const Projects = () => {
                     {KANDBAN_COLS.map(col => {
                         const colProjects = projects.filter(p => p.status === col.key)
                             .filter(p => {
-                                const mSv = themeFilter === 'All' || p.service === themeFilter
-                                const leaderName = p.clientId || ''
+                                const mSv = themeFilter === 'All' || p.theme === themeFilter
+                                const leaderName = p.leader || ''
                                 const mSr = p.name.toLowerCase().includes(search.toLowerCase()) || leaderName.toLowerCase().includes(search.toLowerCase())
                                 return mSv && mSr
                             })
@@ -186,13 +225,13 @@ const Projects = () => {
                                         <div className="kanban-card" key={p.id}>
                                             <div className="kanban-card-title">{p.name}</div>
                                             <div className="kanban-card-meta">
-                                                <ThemeBadge s={p.service} />
-                                                <span title="Repo Branch/Lead">{(p.assignedTo || '—')}</span>
+                                                <ThemeBadge s={p.theme} />
+                                                <span title="Repo Branch/Lead">{(p.repo || '—')}</span>
                                                 <span>{p.deadline ? new Date(p.deadline).toLocaleDateString('en-IN') : '—'}</span>
                                             </div>
                                             <div style={{ marginTop: 8 }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--admin-muted)', marginBottom: 4 }}>
-                                                    <span>{p.clientId || '—'}</span><span>{p.progress || 0}%</span>
+                                                    <span>{p.leader || '—'}</span><span>{p.progress || 0}%</span>
                                                 </div>
                                                 <div className="progress-bar"><div className="progress-fill" style={{ width: `${p.progress || 0}%` }} /></div>
                                             </div>
@@ -225,8 +264,8 @@ const Projects = () => {
                                 {filtered.map(p => (
                                     <tr key={p.id}>
                                         <td><strong style={{ fontSize: '0.875rem' }}>{p.name}</strong></td>
-                                        <td style={{ color: 'var(--admin-muted)', fontSize: '0.82rem' }}>{p.clientId || '—'}</td>
-                                        <td><ThemeBadge s={p.service} /></td>
+                                        <td style={{ color: 'var(--admin-muted)', fontSize: '0.82rem' }}>{p.leader || '—'}</td>
+                                        <td><ThemeBadge s={p.theme} /></td>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 110 }}>
                                                 <div className="progress-bar" style={{ flex: 1 }}><div className="progress-fill" style={{ width: `${p.progress || 0}%` }} /></div>
@@ -235,7 +274,7 @@ const Projects = () => {
                                         </td>
                                         <td><StatusBadge s={p.status} /></td>
                                         <td style={{ color: 'var(--admin-muted)', fontSize: '0.8rem' }}>{p.deadline ? new Date(p.deadline).toLocaleDateString('en-IN') : '—'}</td>
-                                        <td style={{ fontSize: '0.85rem' }}><a href="#" style={{ color: 'var(--admin-primary)', textDecoration: 'none' }}>{p.assignedTo || '—'}</a></td>
+                                        <td style={{ fontSize: '0.85rem' }}><a href={p.repo} target="_blank" rel="noreferrer" style={{ color: 'var(--admin-primary)', textDecoration: 'none' }}>{p.repo ? 'Repository' : '—'}</a></td>
                                         <td>
                                             <div className="action-btns">
                                                 <button className="btn-icon" onClick={() => openEdit(p)} title="Edit"><Pencil size={14} /></button>

@@ -1,7 +1,7 @@
 {
-    "name": "CodeNexus Studio",
-    "short_name": "CodeNexus",
-    "description": "CodeNexus Studio builds fast, scalable websites, web applications and e-commerce platforms.",
+    "name": "c-square Studio",
+    "short_name": "c-square",
+    "description": "c-square Studio builds fast, scalable websites, web applications and e-commerce platforms.",
     "start_url": "/",
     "scope": "/",
     "icons": [
